@@ -1,10 +1,10 @@
-import fs from 'fs';
-import crypto from 'crypto';
-import path from 'path';
+const fs = require('fs');
+const crypto = require('crypto');
+const path = require('path');
 
 // Utils.js to manage file details & hashing to streamline 
 // Calculate SHA-256 hash of a file's content
-var calculateHash = (filePath) => {
+const calculateHash = (filePath) => {
     const hash = crypto.createHash('sha256'); // create a SHA-256 hash object
     const fileData = readFileSync(filePath); //read file into memory 
     hash.update(fileData); // update hash with file data 
@@ -12,7 +12,7 @@ var calculateHash = (filePath) => {
 }
 
 // Recursively traverses a directory and collect file paths
-var traverseDirectory = (dirPath) => {
+const traverseDirectory = (dirPath) => {
     let fileList = []; // initialize empty files list 
     const items = fs.readdirSync(dirPath); // get list of items from dir
     
@@ -31,4 +31,4 @@ var traverseDirectory = (dirPath) => {
     return fileList;
 }
 
-export default { calculateHash, traverseDirectory }
+module.exports = { calculateHash, traverseDirectory };

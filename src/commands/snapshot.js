@@ -1,38 +1,41 @@
-import { Command } from 'commander';
-import { setupDatabase } from '../database';
-import { calculateHash, traverseDirectory } from '../utils';
-import fs from 'fs';
+const { setupDatabase } = require('../database');
+const { calculateHash, traverseDirectory } = require('../utils');
+const fs = require('fs');
+const path = require('path');
 
-const program = new Command();
 
-const snapshot = (directory) => {
+const snapshot = (targetDirectory) => {
     const db = setupDatabase();
     const timestamp = new Date().toISOString();
-    const insertSnapshot = db.prepare("INSERT INTO snapshots (timestamp) VALUES (?)");
-    const snapshotId = insertSnapshot.run(timestamp).lastInsertRowid; 
 
-    const insertFile = db.prepare("INSERT INTO files (snapshot_id, file_path, hash) VALUES (?, ?, ?)");
-    const insertContent = db.prepare("INSERT INTO contents (hash, data) VALUES (?, ?)");
-    const checkContent = db.prepare("SELECT hash FROM contents WHERE hash = ?");
+    // Insert a new snapshot entry
+    const snapshotStats = db.prepare("INSERT INTO snapshots (timestamp) VALUES (?)");
+    const result = snapshotStats.run(timestamp);
+    const snapshotId = result.lastInsertRowid; 
 
-    const files = traverseDirectory(directory);
+    const files = traverseDirectory(targetDirectory);
 
-    for (const filePath of files){
+    files.forEach((filePath) => {
+        const relativePath = path.relative(process.cwd(), filePath);
         const fileHash = calculateHash(filePath);
 
-        if(!checkContent.get(fileHash)) {
+        // check if the content already exists in the 'contents' table
+        const checkContent = db.prepare('SELECT hash FROM contents WHERE hash = ?')
+        const contentExists = checkContent.get(hash);
+
+        // if content doesn't exist, add it
+        if(!contentExists){
             const fileData = fs.readFileSync(filePath);
+            const insertContent = db.prepare('INSERT INTO contents (hash, data) VALUES (?, ?)');
             insertContent.run(fileHash, fileData);
         }
-    }
 
-    console.log(`Snapshot ${snapshotId} created for ${directory}`)
-    db.close();
+        const insertFile = db.prepare('INSERT INTO files (snapshot_id, file_path, hash) VALUES (?, ?, ?)');
+        insertFile.run(snapshotId, relativePath, fileHash);
+        console.log(`Snapshot: stored ${relativePath}`)
+    })
+
+    console.log(`Snapshot complete! Snapshot ID: ${snapshotId}`)
 }
 
-program
-    .command('snapshot <directory>')
-    .description('Take a snapshot of a directory')
-    .action(snapshot);
-
-program.parse(process.argv);
+module.exports = { snapshot };
