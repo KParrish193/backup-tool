@@ -1,5 +1,6 @@
 const fs = require('fs');
 const crypto = require('crypto');
+const db = require('./database');
 const path = require('path');
 
 // Utils.js to manage file details & hashing to streamline 
@@ -31,4 +32,27 @@ const traverseDirectory = (dirPath) => {
     return fileList;
 }
 
-module.exports = { calculateHash, traverseDirectory };
+// restore
+const ensureDirectory = (dirPath) => {
+    if (!fs.existsSync(dirPath)) {
+        fs.mkdirSync(dirPath, {recursive: true});
+    }
+}
+
+async function getSnapshotFiles(snapshotId){
+    const result = await db.all(
+        'SELECT path, hash FROM files WHERE snpashot_id = ?',
+        [snapshotId]
+    );
+    return result;
+}
+
+async function getFileContent(hash){
+    const reault = await db.get(
+        'SELECT content FROM contents WHERE hash = ?',
+        [hash]
+    );
+    return result ? result.content : null;
+}
+
+module.exports = { calculateHash, traverseDirectory, ensureDirectory, getSnapshotFiles, getFileContent };

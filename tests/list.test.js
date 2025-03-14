@@ -1,8 +1,6 @@
 const { setupDatabase } = require('../src/database');
 const { snapshot } = require('../src/commands/snapshot');
 const { list } = require('../src/commands/list');
-// const { restore } = require('../src/commands/restore');
-// const { prune } = require('../commands/prune');
 const fs = require('fs');
 const path = require('path');
 
