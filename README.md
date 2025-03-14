@@ -54,4 +54,3 @@ Restores the directory state from any previous snapshot into a new directory.
 
 ### `prune`
 Removes old snapshots from the database and deletes any unreferenced data.
-
