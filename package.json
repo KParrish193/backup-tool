@@ -1,0 +1,19 @@
+{
+  "name": "backup-tool",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "jest"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "better-sqlite3": "^11.9.0",
+    "commander": "^13.1.0"
+  },
+  "devDependencies": {
+    "jest": "^29.7.0"
+  }
+}
