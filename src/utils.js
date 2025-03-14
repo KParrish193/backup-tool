@@ -6,7 +6,7 @@ const path = require('path');
 // Calculate SHA-256 hash of a file's content
 const calculateHash = (filePath) => {
     const hash = crypto.createHash('sha256'); // create a SHA-256 hash object
-    const fileData = readFileSync(filePath); //read file into memory 
+    const fileData = fs.readFileSync(filePath); //read file into memory 
     hash.update(fileData); // update hash with file data 
     return hash.digest('hex'); // convert hash to hex string
 }

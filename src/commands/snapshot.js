@@ -9,33 +9,26 @@ const snapshot = (targetDirectory) => {
     const timestamp = new Date().toISOString();
 
     // Insert a new snapshot entry
-    const snapshotStats = db.prepare("INSERT INTO snapshots (timestamp) VALUES (?)");
-    const result = snapshotStats.run(timestamp);
-    const snapshotId = result.lastInsertRowid; 
+    const insertSnapshot = db.prepare('INSERT INTO snapshots (timestamp) VALUES (?)');
+    const result = insertSnapshot.run(timestamp);
+    const snapshotId = result.lastInsertRowid;
 
     const files = traverseDirectory(targetDirectory);
+    const insertContent = db.prepare('INSERT OR IGNORE INTO contents (hash, data) VALUES (?, ?)');
+    const insertFile = db.prepare('INSERT INTO files (snapshot_id, file_path, hash) VALUES (?, ?, ?)');
 
     files.forEach((filePath) => {
-        const relativePath = path.relative(process.cwd(), filePath);
         const fileHash = calculateHash(filePath);
+        const fileData = fs.readFileSync(filePath);
 
-        // check if the content already exists in the 'contents' table
-        const checkContent = db.prepare('SELECT hash FROM contents WHERE hash = ?')
-        const contentExists = checkContent.get(hash);
+        // store the file content (only if not already present)
+        insertContent.run(fileHash, fileData);
 
-        // if content doesn't exist, add it
-        if(!contentExists){
-            const fileData = fs.readFileSync(filePath);
-            const insertContent = db.prepare('INSERT INTO contents (hash, data) VALUES (?, ?)');
-            insertContent.run(fileHash, fileData);
-        }
+        // store the file record linking it to the snapshot
+        insertFile.run(snapshotId, filePath, fileHash)
+    });
 
-        const insertFile = db.prepare('INSERT INTO files (snapshot_id, file_path, hash) VALUES (?, ?, ?)');
-        insertFile.run(snapshotId, relativePath, fileHash);
-        console.log(`Snapshot: stored ${relativePath}`)
-    })
-
-    console.log(`Snapshot complete! Snapshot ID: ${snapshotId}`)
+    console.log(`Snapshot ${snapshotId} created at ${timestamp}`);
 }
 
 module.exports = { snapshot };

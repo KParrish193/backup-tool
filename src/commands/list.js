@@ -3,7 +3,7 @@ const { setupDatabase } = require('../database');
 const list = () => {
     const db = setupDatabase();
     
-    const snapshotQuery = db.prepare('SELECT id, timestano FROM snapshots ORDER BY id ASC');
+    const snapshotQuery = db.prepare('SELECT id, timestamp FROM snapshots ORDER BY id ASC');
     const snapshots = snapshotQuery.all();
 
     console.log('SNAPSHOT TIMESTAMP');

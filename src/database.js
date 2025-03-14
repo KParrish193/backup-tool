@@ -1,10 +1,10 @@
-const Database = require('better-sqlite3');
+const sqlite3 = require('better-sqlite3');
+const path = require('path')
 
-const DB_PATH = 'backup.db';
-
-const setupDatabase = () => {
+const setupDatabase = (dbFile = 'backup.db') => {
     // connect to the database, or create if it doesn't already exist
-    const db = new(Database(DB_PATH));
+    const dbPath = path.join(process.cwd(), dbFile);
+    const db = sqlite3(dbPath);
 
     // create snapshots table
     db.prepare(`
@@ -21,7 +21,7 @@ const setupDatabase = () => {
             snapshot_id INTEGER,
             file_path TEXT,
             hash TEXT,
-            FOREIGN KEY(spanshot_id) REFERENCES snapshots(id)
+            FOREIGN KEY(snapshot_id) REFERENCES snapshots(id)
         )
     `).run();
 
