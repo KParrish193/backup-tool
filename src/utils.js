@@ -3,7 +3,6 @@ import { createHash } from 'crypto';
 import path from 'path';
 
 // Utils.js to manage file details & hashing to streamline 
-
 // Calculate SHA-256 hash of a file's content
 var calculateHash = (filePath) => {
     const hash = createHash('sha256'); // create a SHA-256 hash object
