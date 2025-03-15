@@ -18,13 +18,13 @@ program
 program
     .command('snapshot')
     .description('Take a snapshot of the target directory')
-    .option('--target-directory <path>', 'Directory to snapshot')
-    .action((options) => {
-        if(!options.targetDirectory){
-            console.error('Error: --target-directory is required');
+    .option('--target <path>', 'Directory to snapshot')
+    .action((targetDirectory) => {
+        if(!targetDirectory){
+            console.error('Error: --target is required');
             process.exit(1);
         }
-        snapshot(options.targetDirectory);
+        snapshot(targetDirectory);
     });
 
 program
@@ -34,32 +34,28 @@ program
         list();
     });
 
-
 program
     .command('restore')
     .option('--snapshot-id <number>, snapshotID to restore')
     .option('--output-directory <path>', 'Directory to restore to')
-    .action((options) => {
-        if(!options.snapshotId || !options.outputDirectory){
+    .action((snapshotId, outputDirectory) => {
+        if(!snapshotId || !outputDirectory){
             console.error('Error: --snapshot-id and --output-directory are required');
             process.exit(1);
         }
-        restore(parseInt(options.snapshotId), options.outputDirectory);
+        restore(snapshotId, outputDirectory);
     });
 
 program
     .command('prune')
     .description('Prune snapshot by ID')
     .option('--snapshot-id <number>', 'snapshotID to prune')
-    .action((options) => {
-        if(!options.snapshotId){
+    .action((snapshotId) => {
+        if(!snapshotId){
             console.error('Error: --snapshot-id is required');
             process.exit(1);
         }
-        prune(parseInt(options.snapshotId));
+        prune(snapshotId);
     });
 
 program.parse(process.argv);
-
-
-
